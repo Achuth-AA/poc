@@ -20,10 +20,10 @@ import { ANSWERS, AUTH, CATEGORIES, CLARIFY_QUICK, INTENTS, QUICK as SITE_QUICK,
 
 export { SITE };
 export const LANGUAGES = [
-  { code: 'en', name: 'English', short: 'EN' },
-  { code: 'hi', name: 'हिन्दी', short: 'हिं' },
-  { code: 'te', name: 'తెలుగు', short: 'తె' },
-  { code: 'ml', name: 'മലയാളം', short: 'മ' },
+  { code: 'en', name: 'English', short: 'EN', label: 'English' },
+  { code: 'hi', name: 'हिन्दी', short: 'हिं', label: 'Hindi' },
+  { code: 'te', name: 'తెలుగు', short: 'తె', label: 'Telugu' },
+  { code: 'ml', name: 'മലയാളം', short: 'മ', label: 'Malayalam' },
 ];
 
 const DEMO_OTP = '123456';

@@ -147,49 +147,34 @@ export default function Site({ assistant }) {
           </div>
         </section>
 
-        {/* List: statement, table pushed right */}
+        {/* Services: one card per group */}
         <section id="services" className="list" aria-labelledby="services-title" data-chapter="paper">
           <div className="frame">
-            <h2 id="services-title" className="list__title" data-reveal>The services people<br /> open most</h2>
-            <div className="list__body">
-              <figure className="list__pic" data-reveal>
-                <img src="/media/csc-nellai.jpg" alt="The sign of a Common Service Centre in Tamil Nadu, listing the services it offers" width="1920" height="1446" loading="lazy" />
-                <figcaption>Services a citizen once went to a centre for, now in the app.</figcaption>
-              </figure>
-              <div className="list__table" data-reveal>
-                <p className="list__word">Services</p>
-                {GROUPS.map(([g, names]) => (
-                  <div key={g} className="list__group">
-                    {names.map((n, i) => {
-                      const s = SERVICES.find((x) => x.name === n);
-                      return (
-                        <button key={n} type="button" className="list__row" onClick={() => askService(n)}>
-                          <span className="list__kind">{i === 0 ? g : ''}</span><span className="list__svc">{n}</span><span className="list__dept">{s.dept}</span><Icon name="arrowRight" size={16} />
-                        </button>
-                      );
-                    })}
-                  </div>
-                ))}
-              </div>
+            <h2 id="services-title" className="list__title" data-reveal>The services people open most</h2>
+            <div className="list__grid" data-reveal>
+              {GROUPS.map(([g, names]) => (
+                <div key={g} className="list__group">
+                  <h3 className="list__kind">{g}</h3>
+                  {names.map((n) => (
+                    <button key={n} type="button" className="list__row" onClick={() => askService(n)}>
+                      <span className="list__svc">{n}</span><span className="list__dept">{SERVICES.find((x) => x.name === n).dept}</span><Icon name="arrowRight" size={16} />
+                    </button>
+                  ))}
+                </div>
+              ))}
             </div>
           </div>
         </section>
 
-        {/* Stats: a column aligned on the decimal */}
+        {/* Stats: four figures in a row */}
         <section className="ledger" aria-labelledby="ledger-title" data-chapter="paper">
-          <div className="frame ledger__inner">
-            <div className="ledger__head" data-reveal>
-              <h2 id="ledger-title"><span>What to expect</span><br />when you use it</h2>
-              <figure className="ledger__pic">
-                <img src="/media/post-office-services-telugu.jpg" alt="A poster in Telugu at a post office listing savings schemes and Common Service Centre services" width="1920" height="1440" loading="lazy" />
-                <figcaption>The same services, printed on a post-office wall in Telugu.</figcaption>
-              </figure>
-            </div>
+          <div className="frame">
+            <h2 id="ledger-title" className="ledger__title" data-reveal><span>What to expect</span> when you use it</h2>
             <dl className="ledger__rows" data-reveal>
-              <div><dt className="num">20</dt><dd className="ledger__dec" /><dd>days to settle an EPF claim, usually, once your employer has approved your KYC</dd></div>
-              <div><dt className="num">7</dt><dd className="ledger__dec" /><dd>working days at most for a failed payment to come back to your account</dd></div>
-              <div><dt className="num">4</dt><dd className="ledger__dec" /><dd>languages the assistant speaks: English, हिन्दी, తెలుగు and മലയാളം</dd></div>
-              <div><dt className="num">1</dt><dd className="ledger__dec num">.0</dd><dd>second: the time the voice assistant aims to take to start answering</dd></div>
+              <div><dt className="num">20</dt><dd>days to settle an EPF claim, usually, once your employer has approved your KYC</dd></div>
+              <div><dt className="num">7</dt><dd>working days at most for a failed payment to come back to your account</dd></div>
+              <div><dt className="num">4</dt><dd>languages the assistant speaks: English, हिन्दी, తెలుగు and മലയാളം</dd></div>
+              <div><dt className="num">1s</dt><dd>the time the voice assistant aims to take to start answering</dd></div>
             </dl>
           </div>
         </section>
@@ -239,7 +224,6 @@ export default function Site({ assistant }) {
           <Ask assistant={assistant} call className="foot__line">Call the assistant</Ask>
           <div className="foot__meta">
             <span className="foot__links"><a href="#find">Find a service</a><a href="#help">Help</a><a href="https://web.umang.gov.in" rel="noopener noreferrer" target="_blank">The real UMANG</a></span>
-            <span>Photographs: “Common Service Centre Nellai Computers” by Helloasir and a post-office poster by Mouryan, both CC BY-SA 4.0, via Wikimedia Commons.</span>
             <span>Content summarised from public information; may be out of date.</span>
           </div>
         </div>

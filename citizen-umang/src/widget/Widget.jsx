@@ -18,6 +18,60 @@ function load(key) {
 
 const CALL = 'Call the assistant'; // quick reply that starts the voice call straight away
 
+// Language picker: a pill button that opens a listbox of the four languages, each in its own script.
+// Keyboard: arrows/Home/End move, Enter or Space picks, Esc closes the menu (not the panel).
+function LangMenu({ value, onChange, label }) {
+  const [open, setOpen] = useState(false);
+  const [active, setActive] = useState(0);
+  const wrapRef = useRef(null);
+  const btnRef = useRef(null);
+  const listRef = useRef(null);
+  const current = LANGUAGES.find((l) => l.code === value) || LANGUAGES[0];
+
+  useEffect(() => {
+    if (!open) return undefined;
+    setActive(Math.max(0, LANGUAGES.findIndex((l) => l.code === value)));
+    listRef.current?.focus();
+    const away = (e) => { if (!wrapRef.current?.contains(e.target)) setOpen(false); };
+    document.addEventListener('pointerdown', away);
+    return () => document.removeEventListener('pointerdown', away);
+  }, [open, value]);
+
+  const close = () => { setOpen(false); btnRef.current?.focus(); };
+  const choose = (code) => { onChange(code); close(); };
+  function onKey(e) {
+    const last = LANGUAGES.length - 1;
+    if (e.key === 'ArrowDown') { e.preventDefault(); setActive((i) => (i === last ? 0 : i + 1)); }
+    else if (e.key === 'ArrowUp') { e.preventDefault(); setActive((i) => (i === 0 ? last : i - 1)); }
+    else if (e.key === 'Home') { e.preventDefault(); setActive(0); }
+    else if (e.key === 'End') { e.preventDefault(); setActive(last); }
+    else if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); choose(LANGUAGES[active].code); }
+    else if (e.key === 'Escape') { e.preventDefault(); e.stopPropagation(); close(); }
+    else if (e.key === 'Tab') setOpen(false);
+  }
+
+  return (
+    <div className="tnw-lang" ref={wrapRef}>
+      <button ref={btnRef} type="button" className="tnw-lang__btn" aria-haspopup="listbox" aria-expanded={open} aria-label={`${label}: ${current.label}`}
+        onClick={() => setOpen((o) => !o)} onKeyDown={(e) => { if (e.key === 'ArrowDown' || e.key === 'ArrowUp') { e.preventDefault(); setOpen(true); } }}>
+        <Icon name="globe" size={16} /><span lang={current.code}>{current.name}</span><Icon name="chevronDown" size={14} />
+      </button>
+      {open && (
+        <ul ref={listRef} className="tnw-lang__list" role="listbox" tabIndex={-1} aria-label={label} aria-activedescendant={`tnw-lang-${LANGUAGES[active].code}`} onKeyDown={onKey}>
+          {LANGUAGES.map((l, i) => (
+            <li key={l.code} id={`tnw-lang-${l.code}`} role="option" aria-selected={l.code === value} className={i === active ? 'is-active' : ''}
+              onPointerEnter={() => setActive(i)} onClick={() => choose(l.code)}>
+              <span className="tnw-lang__name" lang={l.code}>{l.name}</span>
+              <span className="tnw-lang__en">{l.label !== l.name ? l.label : ''}</span>
+              <Icon name="check" size={16} />
+            </li>
+          ))}
+        </ul>
+      )}
+    </div>
+  );
+}
+
 const Widget = forwardRef(function Widget({ tenant = SITE.tenant }, ref) {
   const storeKey = `tn-assistant:${tenant}`;
   const saved = useRef(load(storeKey));
@@ -269,12 +323,7 @@ const Widget = forwardRef(function Widget({ tenant = SITE.tenant }, ref) {
               <p className="tnw-sub"><span className="tnw-dot" aria-hidden="true" /><span>{withAgent ? t.subAgent : t.sub}</span></p>
             </div>
             <div className="tnw-head__actions">
-              <label className="tnw-langpick">
-                <span className="tnw-sr">{t.language}</span>
-                <select value={lang} onChange={(e) => setLang(e.target.value)} aria-label={t.language}>
-                  {LANGUAGES.map((l) => <option key={l.code} value={l.code} lang={l.code}>{l.name}</option>)}
-                </select>
-              </label>
+              <LangMenu value={lang} onChange={setLang} label={t.language} />
               <button type="button" className="tnw-callbtn" aria-label={t.voice} title={t.voice} onClick={startCall}>
                 <Icon name="phone" size={16} /><span>{t.callShort}</span>
               </button>
@@ -304,12 +353,14 @@ const Widget = forwardRef(function Widget({ tenant = SITE.tenant }, ref) {
               <div className="tnw-call__pulse" aria-hidden="true"><span /><span /><span /></div>
               <p className="tnw-call__status" role="status">{call === 'live' ? t.callLive : t.callConnecting}</p>
               {call === 'live' && <p className="tnw-call__timer" aria-label="Call time">{`${Math.floor(callSec / 60)}:${String(callSec % 60).padStart(2, '0')}`}</p>}
-              <label className="tnw-call__lang">
-                <span>{t.callIn}</span>
-                <select value={lang} onChange={(e) => setLang(e.target.value)}>
-                  {LANGUAGES.map((l) => <option key={l.code} value={l.code} lang={l.code}>{l.name}</option>)}
-                </select>
-              </label>
+              <div className="tnw-call__lang" role="group" aria-label={t.callIn}>
+                <span aria-hidden="true">{t.callIn}</span>
+                <div className="tnw-call__langs">
+                  {LANGUAGES.map((l) => (
+                    <button key={l.code} type="button" lang={l.code} aria-pressed={l.code === lang} aria-label={l.label} onClick={() => setLang(l.code)}>{l.name}</button>
+                  ))}
+                </div>
+              </div>
               <div className="tnw-call__controls">
                 <button type="button" className="tnw-btn tnw-call__mute" aria-pressed={muted} disabled={call !== 'live'} onClick={() => setMuted((v) => !v)}>
                   <Icon name={muted ? 'micOff' : 'mic'} size={18} />{muted ? t.unmute : t.mute}
