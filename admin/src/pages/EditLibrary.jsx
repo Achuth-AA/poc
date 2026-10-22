@@ -221,24 +221,17 @@ export default function EditLibrary() {
                   <span className="lib__name">
                     <span className="source__title">{it.name}</span>
                     <span className="note">{BY_ID[it.source].name}{it.type !== 'URL' && it.type !== 'API' ? `, ${it.type}` : ''}{it.tool ? `, tool ${it.tool}` : ''}</span>
-                    <label className="lib__map">
-                      <span className="sr-only">What {it.name} is</span>
-                      <select value={it.replaces} onChange={(e) => update(it.id, { replaces: e.target.value })}>
-                        <option value="">Add as a new source</option>
-                        {documents.filter((d) => d.status === 'published' && (d.audience === 'tool') === (it.audience === 'tool')).map((d) => (
-                          <option key={d.id} value={d.id} disabled={items.some((o) => o.id !== it.id && o.replaces === d.id)}>Replaces “{d.title}” v{d.version} → v{d.version + 1}</option>
-                        ))}
-                      </select>
-                    </label>
+                    <Select className="lib__map" label={`What ${it.name} is`} value={it.replaces} onChange={(v) => update(it.id, { replaces: v })}
+                      options={[{ value: '', label: 'Add as a new source' }, ...documents.filter((d) => d.status === 'published' && (d.audience === 'tool') === (it.audience === 'tool')).map((d) => (
+                        { value: d.id, label: `Replaces “${d.title}” v${d.version} → v${d.version + 1}`, disabled: items.some((o) => o.id !== it.id && o.replaces === d.id) }
+                      ))]} />
                   </span>
                   {it.ttl && (
-                    <select value={it.ttl} aria-label={`Refresh ${it.name} every`} onChange={(e) => update(it.id, { ttl: Number(e.target.value) })}>
-                      {TTL_OPTIONS.map((d) => <option key={d} value={d}>Refresh every {d} days</option>)}
-                    </select>
+                    <Select label={`Refresh ${it.name} every`} value={it.ttl} onChange={(v) => update(it.id, { ttl: Number(v) })}
+                      options={TTL_OPTIONS.map((d) => ({ value: d, label: `Refresh every ${d} days` }))} />
                   )}
-                  <select value={it.audience} aria-label={`Who can use ${it.name}`} disabled={it.audience === 'tool'} onChange={(e) => update(it.id, { audience: e.target.value })}>
-                    {it.audience === 'tool' ? <option value="tool">Data for a tool</option> : <><option value="public">Public</option><option value="internal">Officers only</option></>}
-                  </select>
+                  <Select label={`Who can use ${it.name}`} value={it.audience} disabled={it.audience === 'tool'} onChange={(v) => update(it.id, { audience: v })}
+                    options={it.audience === 'tool' ? [{ value: 'tool', label: 'Data for a tool' }] : [{ value: 'public', label: 'Public' }, { value: 'internal', label: 'Officers only' }]} />
                   <button type="button" className="icon-btn" aria-label={`Remove ${it.name}`} onClick={() => setItems((x) => x.filter((y) => y.id !== it.id))}><Icon name="x" /></button>
                 </li>
               ))}

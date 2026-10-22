@@ -4,8 +4,11 @@ import { NavLink, useLocation } from 'react-router-dom';
 import { useAssist } from '../store.jsx';
 import { useToast } from './Toast.jsx';
 import Icon from './Icon.jsx';
+import Select from './Select.jsx';
 
 const NAV = [{ to: '/', label: 'Live queue', icon: 'headset' }, { to: '/callbacks', label: 'Callbacks', icon: 'calendar' }];
+
+const STATUSES = [['available', 'Available'], ['busy', 'Busy'], ['away', 'Away']];
 
 export default function Frame({ children }) {
   const { state, dispatch } = useAssist();
@@ -15,9 +18,9 @@ export default function Frame({ children }) {
   const here = NAV.find((n) => (n.to === '/' ? !location.pathname.startsWith('/callbacks') : location.pathname.startsWith(n.to)));
   const waiting = state.queue.length;
 
-  function setStatus(e) {
-    dispatch({ type: 'status', status: e.target.value });
-    toast(e.target.value === 'available' ? 'You will receive new handoffs.' : 'New handoffs go to other officers, or citizens are offered a callback.');
+  function setStatus(value) {
+    dispatch({ type: 'status', status: value });
+    toast(value === 'available' ? 'You will receive new handoffs.' : 'New handoffs go to other officers, or citizens are offered a callback.');
   }
 
   return (
@@ -40,12 +43,8 @@ export default function Frame({ children }) {
       <header className="topbar">
         <span className="topbar__title">Agent console<span className="topbar__sep" aria-hidden="true">/</span><b>{here?.label}</b></span>
         <span className="topbar__spacer" />
-        <label className="status-select">
-          <span className="status-dot" data-status={status} aria-hidden="true" />
-          <select value={status} onChange={setStatus} aria-label="My status">
-            <option value="available">Available</option><option value="busy">Busy</option><option value="away">Away</option>
-          </select>
-        </label>
+        <Select className="status-select" label="My status" value={status} onChange={setStatus}
+          options={STATUSES.map(([value, label]) => ({ value, label, lead: <span className="status-dot" data-status={value} aria-hidden="true" /> }))} />
         <span className="officer">
           <span className="avatar" aria-hidden="true">{officer.short}</span>
           <span className="officer__text"><strong>{officer.name}</strong><small>{officer.email}</small></span>

@@ -4,6 +4,9 @@ import { useToast } from '../components/Toast.jsx';
 import { pct, stamp } from '../lib/format.js';
 import { useStore } from '../store.jsx';
 import Icon from '../components/Icon.jsx';
+import Select from '../components/Select.jsx';
+
+const SUITES = ['All suites', 'Golden Q&A (150)', 'Unanswerable (30)', 'Escalation (30)', 'Red team (40)', 'Audio / STT (100)', 'Latency benchmark (220 turns)'];
 
 const STEPS = ['Golden Q&A', 'Unanswerable', 'Escalation', 'Red team', 'Audio / STT', 'Latency benchmark'];
 const fmt = (m) => (m.unit === 'ms' ? `${m.value.toLocaleString('en-IN')} ms` : pct(m.value, 1));
@@ -12,6 +15,7 @@ export default function Evaluation() {
   const { evalReport: R, setEvalReport } = useStore();
   const toast = useToast();
   const [progress, setProgress] = useState(null); // null | step index
+  const [suite, setSuite] = useState(SUITES[0]);
   const timers = useRef([]);
   useEffect(() => () => timers.current.forEach(clearTimeout), []);
 
@@ -46,10 +50,7 @@ export default function Evaluation() {
               <span>{progress === 0 ? 'Starting…' : `${STEPS[Math.min(progress, STEPS.length) - 1]} (${Math.min(progress, STEPS.length)}/${STEPS.length})`}</span>
             </div>
           )}
-          <select aria-label="Test suite" defaultValue="all">
-            <option value="all">All suites</option><option>Golden Q&amp;A (150)</option><option>Unanswerable (30)</option><option>Escalation (30)</option>
-            <option>Red team (40)</option><option>Audio / STT (100)</option><option>Latency benchmark (220 turns)</option>
-          </select>
+          <Select label="Test suite" value={suite} onChange={setSuite} options={SUITES.map((x) => ({ value: x, label: x }))} />
           <button type="button" className="btn btn--primary" disabled={progress !== null} onClick={run}>Run evaluation</button>
         </div>
       </div>
