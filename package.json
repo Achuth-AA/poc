@@ -1,0 +1,13 @@
+{
+  "name": "tendernotice",
+  "private": true,
+  "description": "Voice AI Agent Platform POC: four separate React + Vite frontends",
+  "scripts": {
+    "install:all": "npm --prefix citizen-digilocker install && npm --prefix citizen-umang install && npm --prefix admin install && npm --prefix human-assist install",
+    "dev:digilocker": "npm --prefix citizen-digilocker run dev",
+    "dev:umang": "npm --prefix citizen-umang run dev",
+    "dev:admin": "npm --prefix admin run dev",
+    "dev:agent": "npm --prefix human-assist run dev",
+    "build:all": "npm --prefix citizen-digilocker run build && npm --prefix citizen-umang run build && npm --prefix admin run build && npm --prefix human-assist run build"
+  }
+}

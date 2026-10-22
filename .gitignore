@@ -1,0 +1,11 @@
+node_modules/
+dist/
+.env
+.env.local
+.DS_Store
+
+# The root package.json only holds scripts; each app has its own lockfile.
+/package-lock.json
+
+# Design tooling output (taste-skill inspector, direction sheets)
+.taste-skill/
