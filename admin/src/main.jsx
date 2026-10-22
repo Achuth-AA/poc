@@ -10,6 +10,10 @@ import EditLibrary from './pages/EditLibrary.jsx';
 import Models from './pages/Models.jsx';
 import Calls from './pages/Calls.jsx';
 import Evaluation from './pages/Evaluation.jsx';
+import Campaigns from './pages/Campaigns.jsx';
+import Channels from './pages/Channels.jsx';
+import Integrations from './pages/Integrations.jsx';
+import Access from './pages/Access.jsx';
 import './styles/admin.css';
 import './styles/pages.css';
 
@@ -26,6 +30,10 @@ createRoot(document.getElementById('root')).render(
               <Route path="models" element={<Models />} />
               <Route path="providers" element={<Navigate to="/models" replace />} />
               <Route path="calls" element={<Calls />} />
+              <Route path="campaigns" element={<Campaigns />} />
+              <Route path="channels" element={<Channels />} />
+              <Route path="integrations" element={<Integrations />} />
+              <Route path="access" element={<Access />} />
               <Route path="evaluation" element={<Evaluation />} />
               <Route path="*" element={<Dashboard />} />
             </Route>

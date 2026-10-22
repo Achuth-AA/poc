@@ -9,6 +9,10 @@ const NAV = [
   { to: '/knowledge', label: 'Knowledge base', icon: 'book' },
   { to: '/models', label: 'Models & voice', icon: 'sparkle' },
   { to: '/calls', label: 'Calls & chats', icon: 'phone' },
+  { to: '/campaigns', label: 'Outbound campaigns', icon: 'megaphone' },
+  { to: '/channels', label: 'Channels & telephony', icon: 'server' },
+  { to: '/integrations', label: 'Integrations & tools', icon: 'plug' },
+  { to: '/access', label: 'Access & security', icon: 'lock' },
   { to: '/evaluation', label: 'Evaluation', icon: 'chart' },
 ];
 

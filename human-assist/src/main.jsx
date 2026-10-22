@@ -5,6 +5,7 @@ import Frame from './components/Bar.jsx';
 import { ToastProvider } from './components/Toast.jsx';
 import Callbacks from './pages/Callbacks.jsx';
 import Console from './pages/Console.jsx';
+import Supervisor from './pages/Supervisor.jsx';
 import { AssistProvider } from './store.jsx';
 import './styles/assist.css';
 
@@ -16,6 +17,7 @@ createRoot(document.getElementById('root')).render(
           <Frame>
             <Routes>
               <Route path="/callbacks" element={<Callbacks />} />
+              <Route path="/supervisor" element={<Supervisor />} />
               <Route path="*" element={<Console />} />
             </Routes>
           </Frame>
