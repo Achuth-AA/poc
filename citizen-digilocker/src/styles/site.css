@@ -294,6 +294,7 @@ body.high-contrast .tile, body.high-contrast .plate__pic, body.high-contrast .sl
   .tile--mark, .tile--accent { grid-column: 1 / -1; }
 }
 @media (max-width: 640px) {
+  .bar__tools button { min-height: 40px; min-width: 36px; padding: 8px 6px; }
   .bar { position: static; }
   .bar__inner { gap: 12px 20px; padding-block: 10px; }
   .bar__nav { order: 3; flex-basis: 100%; }

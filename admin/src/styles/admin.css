@@ -179,7 +179,15 @@ code, .mono { font-family: var(--mono); font-size: 13px; }
 .route--blocked { color: #831c1e; background: var(--bad-bg); }
 .route--auth, .route--greeting { color: var(--ink-2); background: var(--surface-3); }
 
-.table-wrap { overflow-x: auto; position: relative; }
+.table-wrap {
+  overflow-x: auto; position: relative;
+  /* Edge shadows appear only while there is more table to scroll to. */
+  background:
+    linear-gradient(to right, var(--surface) 30%, transparent) left / 32px 100% no-repeat local,
+    linear-gradient(to left, var(--surface) 30%, transparent) right / 32px 100% no-repeat local,
+    radial-gradient(farthest-side at 0 50%, rgba(15, 23, 42, .14), transparent) left / 12px 100% no-repeat scroll,
+    radial-gradient(farthest-side at 100% 50%, rgba(15, 23, 42, .14), transparent) right / 12px 100% no-repeat scroll;
+}
 table.data { width: 100%; border-collapse: collapse; }
 table.data th { text-align: left; font-size: 11px; font-weight: 600; letter-spacing: .05em; text-transform: uppercase; color: var(--muted); padding: 10px 16px; background: var(--surface-2); border-bottom: 1px solid var(--line); white-space: nowrap; }
 table.data th.num { text-align: right; }
@@ -300,6 +308,15 @@ svg .ring-num { font-size: 22px; font-weight: 400; fill: var(--ink); font-varian
   .hbars li { grid-template-columns: 110px 1fr 44px; }
   .budget__row { grid-template-columns: 130px 1fr 60px; }
   .toolbar input[type="search"] { width: 100%; }
+  /* Wide tables keep readable columns and scroll sideways instead of squeezing every cell. */
+  .table-wrap table.data:has(thead th:nth-child(4)) { min-width: 600px; }
+  table.data td, table.data th { padding-inline: 12px; }
+  .kv { grid-template-columns: 1fr; gap: 0; }
+  .kv dd { margin-bottom: 10px; }
+  .page-head h1 { font-size: 24px; }
+  .card__head { padding: 14px 16px 10px; }
+  .card__body { padding: 4px 16px 16px; }
+  .btn { height: 40px; }
 }
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after { transition-duration: 1ms !important; animation: none !important; }

@@ -20,7 +20,7 @@ export default function Callbacks() {
         <p className="page-sub">Booked when no officer was free (for example, a web chat at 11 pm) or by an officer during a call. Each one carries the AI summary and the full transcript.</p>
       </div>
       <div className="card">
-        <table className="data">
+        <table className="data data--cards">
           <thead><tr><th>Ref.</th><th>When</th><th>Channel</th><th>Language</th><th>AI summary</th><th>Verified</th><th>Status</th><th><span className="sr-only">Action</span></th></tr></thead>
           <tbody>
             {state.callbacks.map((c) => (
