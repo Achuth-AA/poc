@@ -60,13 +60,13 @@ export default function Calls() {
           <div className="card__head"><div><h2>Sessions</h2><p>{rows.length} sessions today</p></div></div>
           <div className="card__body card__body--flush table-wrap">
             <table className="data">
-              <thead><tr><th>Session</th><th>Lang.</th><th className="num">p50</th><th>Outcome</th></tr></thead>
+              <thead><tr><th>Session</th><th className="num">p50</th><th>Outcome</th></tr></thead>
               <tbody>
                 {rows.map((x) => (
                   <tr key={x.id} className={`is-clickable ${x.id === s.id ? 'is-selected' : ''}`} tabIndex={0} aria-current={x.id === s.id || undefined}
                     onClick={() => choose(x.id)} onKeyDown={(e) => e.key === 'Enter' && choose(x.id)}>
-                    <td><div className="cell-title"><Icon name={x.channel === 'voice' ? 'phone' : 'chat'} size={16} title={x.channel === 'voice' ? 'Voice' : 'Chat'} /><span className="mono">{x.id}</span></div><div className="cell-sub">{x.started} · {x.duration} · {x.turns} turns</div></td>
-                    <td>{x.lang}</td><td className="num">{x.p50} ms</td><td><Badge status={x.outcome} /></td>
+                    <td><div className="cell-title"><Icon name={x.channel === 'voice' ? 'phone' : 'chat'} size={16} title={x.channel === 'voice' ? 'Voice' : 'Chat'} /><span className="mono">{x.id}</span></div><div className="cell-sub">{x.lang} · {x.started} · {x.duration} · {x.turns} turns</div></td>
+                    <td className="num">{x.p50} ms</td><td><Badge status={x.outcome} /></td>
                   </tr>
                 ))}
               </tbody>

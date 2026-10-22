@@ -3,6 +3,7 @@
 // visible focus. Targets WCAG 2.1 AA / GIGW 3.0.
 import { forwardRef, useCallback, useEffect, useImperativeHandle, useRef, useState } from 'react';
 import { CallOfferCard, ConfirmCard, OfflineHandoffCard, OtpCard, StatusCard } from './cards.jsx';
+import { AUTH } from './content.js';
 import { backend, LANGUAGES, SITE } from './mockBackend.js';
 import { STRINGS } from './strings.js';
 import './widget.css';
@@ -17,6 +18,26 @@ function load(key) {
 }
 
 const CALL = 'Call the assistant'; // quick reply that starts the voice call straight away
+
+// Keypad on the voice call, like a helpline menu: 1 checks a status (reference number, then OTP), 0 gets an officer.
+// Digits typed here never go through speech recognition, so an OTP is never spoken or transcribed.
+const KEYS = [['1', ''], ['2', 'ABC'], ['3', 'DEF'], ['4', 'GHI'], ['5', 'JKL'], ['6', 'MNO'], ['7', 'PQRS'], ['8', 'TUV'], ['9', 'WXYZ'], ['*', ''], ['0', '+'], ['#', '']];
+const REF_PREFIX = AUTH.example.replace(/\d+$/, ''); // the letters before the 10 digits, e.g. UM or DL
+const DEMO_CALLER = '9876543210'; // the browser call's stand-in for caller ID; the OTP goes to the number registered with the reference
+const DTMF = { 1: [697, 1209], 2: [697, 1336], 3: [697, 1477], 4: [770, 1209], 5: [770, 1336], 6: [770, 1477], 7: [852, 1209], 8: [852, 1336], 9: [852, 1477], '*': [941, 1209], 0: [941, 1336], '#': [941, 1477] };
+let audio;
+function tone(key) {
+  try {
+    audio = audio || new (window.AudioContext || window.webkitAudioContext)();
+    const t0 = audio.currentTime;
+    const gain = audio.createGain();
+    gain.gain.setValueAtTime(0.0001, t0);
+    gain.gain.exponentialRampToValueAtTime(0.1, t0 + 0.01);
+    gain.gain.exponentialRampToValueAtTime(0.0001, t0 + 0.15);
+    gain.connect(audio.destination);
+    for (const f of DTMF[key]) { const o = audio.createOscillator(); o.frequency.value = f; o.connect(gain); o.start(t0); o.stop(t0 + 0.16); }
+  } catch { /* no audio output: the keypad still works */ }
+}
 
 // Language picker: a pill button that opens a listbox of the four languages, each in its own script.
 // Keyboard: arrows/Home/End move, Enter or Space picks, Esc closes the menu (not the panel).
@@ -212,6 +233,97 @@ const Widget = forwardRef(function Widget({ tenant = SITE.tenant }, ref) {
   }, [call]);
   const startCall = () => { setCallSec(0); setMuted(false); setCall('connecting'); };
 
+  // ---------- call keypad (helpline menu) ----------
+  const [ivr, setIvr] = useState(null); // { step: menu | ref | otp | done | agent, digits, msg: [string keys], hint, readout, agent }
+  const [padOpen, setPadOpen] = useState(false);
+  const ivrRef = useRef(null);
+  const ivrBusy = useRef(false);
+  const update = useCallback((fn) => { if (!ivrRef.current) return; ivrRef.current = fn(ivrRef.current); setIvr(ivrRef.current); }, []);
+  useEffect(() => {
+    if (call === 'live') { ivrRef.current = { step: 'menu', digits: '', msg: ['ivrMenu'], hint: '', readout: '' }; setIvr(ivrRef.current); setPadOpen(true); }
+    if (call === 'off') { ivrRef.current = null; setIvr(null); setPadOpen(false); }
+  }, [call]);
+
+  function finishStatus(blocks, verified) {
+    const rec = blocks.find((b) => b.type === 'status')?.record;
+    if (verified) push({ kind: 'system', text: 'Verified with OTP on the call', icon: 'shield' });
+    renderBlocks(blocks, langRef.current);
+    const row = (name) => rec?.rows.find(([k]) => k === name)?.[1];
+    update((v) => ({ ...v, step: 'done', digits: '', hint: '', msg: ['ivrDone'], readout: rec ? [row('Status'), row('Next step')].filter(Boolean).join('. ') : '' }));
+  }
+
+  async function ivrSubmit(digits) {
+    const { step } = ivrRef.current;
+    ivrBusy.current = true;
+    try {
+      if (step === 'ref') {
+        const res = digits.length === 10 && await backend.sendOtp(sessionRef.current, REF_PREFIX + digits, DEMO_CALLER);
+        if (!res?.ok) update((v) => ({ ...v, digits: '', msg: ['ivrRefBad', 'ivrRef'] }));
+        else update((v) => ({ ...v, step: 'otp', digits: '', msg: ['ivrOtp'], hint: res.hint }));
+      } else if (step === 'otp') {
+        const res = await backend.verifyOtp(sessionRef.current, digits);
+        if (!res.ok) update((v) => ({ ...v, digits: '', msg: ['ivrOtpBad', 'ivrOtp'] }));
+        else finishStatus(res.blocks, true);
+      }
+    } finally { ivrBusy.current = false; }
+  }
+
+  async function ivrOfficer() {
+    update((v) => ({ ...v, step: 'agent', digits: '', hint: '', readout: '', msg: ['ivrAgent'] }));
+    ivrBusy.current = true;
+    const agent = await backend.connectAgent(sessionRef.current);
+    ivrBusy.current = false;
+    setWithAgent(true);
+    push({ kind: 'system', text: `${agent.name} ${STRINGS[langRef.current].joined}` });
+    push({ kind: 'agent', name: agent.name, text: agent.text });
+    update((v) => ({ ...v, agent: agent.name, msg: ['ivrJoined'] }));
+  }
+
+  async function press(key) {
+    const cur = ivrRef.current;
+    if (!cur || ivrBusy.current) return;
+    tone(key);
+    if (cur.step === 'menu' || cur.step === 'done') {
+      if (key === '1' && cur.step === 'menu') {
+        if ((backend.snapshot(sessionRef.current)?.auth || 0) >= 1) { // already verified in this chat
+          ivrBusy.current = true;
+          try { finishStatus((await backend.sendTurn(sessionRef.current, 'Check my status', langRef.current, { quick: true })).blocks, false); } finally { ivrBusy.current = false; }
+        } else update((v) => ({ ...v, step: 'ref', digits: '', msg: ['ivrRef'], hint: '', readout: '' }));
+      } else if (key === '9') update((v) => ({ ...v, step: 'menu', msg: ['ivrMenu'], hint: '', readout: '' }));
+      else if (key === '0') ivrOfficer();
+      else update((v) => ({ ...v, msg: ['ivrInvalid', v.step === 'menu' ? 'ivrMenu' : 'ivrDone'] }));
+      return;
+    }
+    if (cur.step !== 'ref' && cur.step !== 'otp') return;
+    if (key === '*') { update((v) => ({ ...v, digits: v.digits.slice(0, -1) })); return; }
+    if (key === '#') { ivrSubmit(cur.digits); return; }
+    const max = cur.step === 'ref' ? 10 : 6;
+    if (cur.digits.length >= max) return;
+    const digits = cur.digits + key;
+    update((v) => ({ ...v, digits }));
+    if (cur.step === 'otp' && digits.length === 6) ivrSubmit(digits);
+  }
+  const pressRef = useRef(press);
+  pressRef.current = press;
+  // A hardware keyboard works too: digits, * and #, Backspace deletes, Enter confirms.
+  useEffect(() => {
+    if (call !== 'live') return undefined;
+    const onKey = (e) => {
+      if (e.ctrlKey || e.metaKey || e.altKey || /^(INPUT|TEXTAREA|SELECT)$/.test(e.target.tagName)) return;
+      // Enter confirms (#) unless focus is on some other button, which Enter should press as usual.
+      const onKeypad = !!e.target.closest?.('.tnw-pad');
+      const key = e.key === 'Backspace' ? '*' : e.key === 'Enter' && (onKeypad || e.target.tagName !== 'BUTTON') ? '#' : e.key;
+      if (/^[0-9*#]$/.test(key)) { e.preventDefault(); pressRef.current(key); }
+    };
+    document.addEventListener('keydown', onKey);
+    return () => document.removeEventListener('keydown', onKey);
+  }, [call]);
+  const ivrText = (key) => {
+    if (key === 'ivrJoined') return `${ivr.agent} ${t.ivrJoined}.`;
+    const v = t[key];
+    return typeof v === 'function' ? v(AUTH.label[lang] || AUTH.label.en) : v;
+  };
+
   function submit(e) {
     e.preventDefault();
     const v = text;
@@ -349,10 +461,12 @@ const Widget = forwardRef(function Widget({ tenant = SITE.tenant }, ref) {
           <p className="tnw-disclaimer">{t.disclaimer}</p>
 
           {call !== 'off' && (
-            <div className={`tnw-call ${call === 'live' ? 'is-live' : ''} ${muted ? 'is-muted' : ''}`} role="region" aria-label={t.voice}>
+            <div className={`tnw-call ${call === 'live' ? 'is-live' : ''} ${muted ? 'is-muted' : ''} ${padOpen ? 'is-pad' : ''}`} role="region" aria-label={t.voice}>
               <div className="tnw-call__pulse" aria-hidden="true"><span /><span /><span /></div>
-              <p className="tnw-call__status" role="status">{call === 'live' ? t.callLive : t.callConnecting}</p>
-              {call === 'live' && <p className="tnw-call__timer" aria-label="Call time">{`${Math.floor(callSec / 60)}:${String(callSec % 60).padStart(2, '0')}`}</p>}
+              <div className="tnw-call__line">
+                <p className="tnw-call__status" role="status">{call === 'live' ? t.callLive : t.callConnecting}</p>
+                {call === 'live' && <p className="tnw-call__timer" aria-label="Call time">{`${Math.floor(callSec / 60)}:${String(callSec % 60).padStart(2, '0')}`}</p>}
+              </div>
               <div className="tnw-call__lang" role="group" aria-label={t.callIn}>
                 <span aria-hidden="true">{t.callIn}</span>
                 <div className="tnw-call__langs">
@@ -361,9 +475,38 @@ const Widget = forwardRef(function Widget({ tenant = SITE.tenant }, ref) {
                   ))}
                 </div>
               </div>
+              {call === 'live' && ivr && (
+                <div className="tnw-call__say" aria-live="polite">
+                  <Icon name="volume" size={16} />
+                  <p>{ivr.msg.map(ivrText).join(' ')}{ivr.readout && <b className="tnw-call__readout">{ivr.readout}.</b>}</p>
+                </div>
+              )}
+              {call === 'live' && ivr && padOpen && (
+                <div className="tnw-pad">
+                  {(ivr.step === 'ref' || ivr.step === 'otp') && (
+                    <p className="tnw-pad__display" aria-label={ivr.step === 'otp' ? `${t.otp}: ${ivr.digits.length}/6` : `${AUTH.label[lang] || AUTH.label.en}: ${REF_PREFIX}${ivr.digits}`}>
+                      {ivr.step === 'ref'
+                        ? <><span className="tnw-pad__prefix">{REF_PREFIX}</span>{ivr.digits}<span className="tnw-pad__rest">{'0'.repeat(10 - ivr.digits.length)}</span></>
+                        : <>{'•'.repeat(ivr.digits.length)}<span className="tnw-pad__rest">{'•'.repeat(6 - ivr.digits.length)}</span></>}
+                    </p>
+                  )}
+                  {ivr.hint && <p className="tnw-pad__hint">{ivr.hint}</p>}
+                  <div className="tnw-pad__keys" role="group" aria-label={t.keypad}>
+                    {KEYS.map(([k, sub]) => (
+                      <button key={k} type="button" className="tnw-key" aria-label={k === '*' ? `* ${t.keyDelete}` : k === '#' ? `# ${t.keyConfirm}` : k} onClick={() => press(k)}>
+                        <span>{k}</span>{sub && <small aria-hidden="true">{sub}</small>}
+                      </button>
+                    ))}
+                  </div>
+                  <p className="tnw-pad__help">{t.keyHelp}</p>
+                </div>
+              )}
               <div className="tnw-call__controls">
                 <button type="button" className="tnw-btn tnw-call__mute" aria-pressed={muted} disabled={call !== 'live'} onClick={() => setMuted((v) => !v)}>
                   <Icon name={muted ? 'micOff' : 'mic'} size={18} />{muted ? t.unmute : t.mute}
+                </button>
+                <button type="button" className="tnw-btn tnw-call__padbtn" aria-pressed={padOpen} disabled={call !== 'live'} onClick={() => setPadOpen((v) => !v)}>
+                  <Icon name="grid" size={18} />{t.keypad}
                 </button>
                 <button type="button" className="tnw-btn tnw-btn--danger tnw-call__end" autoFocus onClick={() => setCall('off')}><Icon name="phoneOff" size={18} />{t.endCall}</button>
               </div>
