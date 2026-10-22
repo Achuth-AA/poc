@@ -267,6 +267,7 @@
 .tnw-call__pulse span:nth-child(3) { animation-delay: 1.3s; }
 .tnw-call.is-live .tnw-call__pulse span { background: rgba(110, 220, 140, .35); }
 @keyframes tnw-pulse { from { transform: scale(.45); opacity: 1; } to { transform: scale(1.3); opacity: 0; } }
+.tnw-call__line { display: grid; justify-items: center; gap: 4px; }
 .tnw-call__status { font-weight: 600; margin: 0; }
 .tnw-call__timer { margin: -6px 0 0; font-variant-numeric: tabular-nums; font-size: 30px; font-weight: 400; }
 .tnw-call__lang { display: grid; justify-items: center; gap: 8px; font-size: 13px; color: rgba(255, 255, 255, .78); }
@@ -284,6 +285,48 @@
 .tnw-call.is-muted .tnw-call__pulse span { animation-play-state: paused; opacity: .25; }
 .tnw-call__note { font-size: 13px; color: rgba(255, 255, 255, .82); margin: 0; max-width: 300px; }
 .tnw-call__back { color: #fff; font-size: 14px; }
+
+/* Keypad mode: the call screen becomes a helpline menu. Compact status line, spoken prompt, then the keys. */
+.tnw-call.is-pad { justify-content: flex-start; gap: 10px; padding: 14px 20px 12px; overflow-y: auto; }
+.tnw-call.is-pad .tnw-call__pulse { display: none; }
+.tnw-call.is-pad .tnw-call__line { display: flex; align-items: baseline; justify-content: center; gap: 10px; }
+.tnw-call.is-pad .tnw-call__timer { margin: 0; font-size: 15px; opacity: .8; }
+.tnw-call.is-pad .tnw-call__lang > span, .tnw-call.is-pad .tnw-call__note { display: none; }
+.tnw-call.is-pad .tnw-call__langs button { height: 28px; font-size: 13px; padding: 0 10px; }
+.tnw-call.is-pad .tnw-call__controls { flex-wrap: nowrap; gap: 8px; }
+.tnw-call.is-pad .tnw-call__controls .tnw-btn { height: 40px; padding: 0 14px; }
+.tnw-call.is-pad .tnw-pad__keys { row-gap: 6px; }
+.tnw-call__say {
+  align-self: stretch; display: flex; gap: 10px; align-items: flex-start; text-align: left; padding: 10px 12px;
+  background: rgba(255, 255, 255, .1); border-radius: calc(var(--tnw-radius) * 2); font-size: 14px; line-height: 1.45;
+}
+.tnw-call__say > svg { flex: none; margin-top: 2px; opacity: .8; }
+.tnw-call__say p { margin: 0; }
+.tnw-call__readout { display: block; margin-top: 6px; font-weight: 600; }
+.tnw-pad { align-self: stretch; display: grid; gap: 8px; justify-items: center; }
+.tnw-pad__display {
+  margin: 0; min-width: 220px; padding: 6px 14px; border-radius: calc(var(--tnw-radius) * 2); background: rgba(0, 0, 0, .22);
+  font-size: 22px; letter-spacing: .12em; font-variant-numeric: tabular-nums; font-weight: 600; text-align: center;
+}
+.tnw-pad__prefix { opacity: .75; margin-right: .3em; }
+.tnw-pad__rest { opacity: .3; }
+.tnw-pad__hint { margin: 0; font-size: 12px; padding: 4px 10px; border-radius: 999px; background: rgba(110, 220, 140, .18); color: #c9f2d4; }
+.tnw-pad__keys { display: grid; grid-template-columns: repeat(3, 64px); gap: 8px 18px; }
+.tnw-key {
+  width: 64px; height: 48px; border-radius: 999px; border: 0; cursor: pointer; display: grid; place-content: center; line-height: 1;
+  background: rgba(255, 255, 255, .12); color: #fff; transition: background-color 120ms ease, transform 100ms var(--tnw-ease);
+}
+.tnw-key span { font-size: 21px; font-weight: 500; }
+.tnw-key small { font-size: 9px; letter-spacing: .12em; opacity: .7; margin-top: 2px; }
+.tnw-key:active { transform: scale(.93); background: rgba(255, 255, 255, .3); }
+.tnw-pad__help { margin: 0; font-size: 12px; opacity: .7; }
+.tnw-call__padbtn { background: rgba(255, 255, 255, .16); color: #fff; }
+.tnw-call__padbtn[aria-pressed="true"] { background: #fff; color: var(--tnw-brand); }
+@media (hover: hover) and (pointer: fine) {
+  .tnw-key:hover { background: rgba(255, 255, 255, .2); }
+  .tnw-call__padbtn:hover:not(:disabled) { background: rgba(255, 255, 255, .26); }
+  .tnw-call__padbtn[aria-pressed="true"]:hover:not(:disabled) { background: #f0f0f0; }
+}
 
 @media (max-width: 480px) {
   .tnw-panel { right: 0; bottom: 0; width: 100vw; height: 100dvh; border-radius: 0; }

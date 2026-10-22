@@ -5,6 +5,12 @@ import { AUTH, SITE } from './content.js';
 const n = SITE.name;
 export const STRINGS = {
   en: {
+    keypad: 'Keypad', keyDelete: 'delete', keyConfirm: 'confirm', keyHelp: '* deletes · # confirms',
+    ivrMenu: 'Press 1 to check your status. Press 0 to talk to an officer.', ivrInvalid: 'Sorry, that is not an option.',
+    ivrRef: (label) => `${label}: type the 10 digits, then press #.`, ivrRefBad: 'Please enter all 10 digits.',
+    ivrOtp: 'We have sent an OTP to your registered mobile. Type the 6 digits.', ivrOtpBad: 'That OTP is not correct. Please try again.',
+    ivrDone: 'Verified. Here is your status. Press 9 for the menu or 0 for an officer.',
+    ivrAgent: 'Connecting you to an officer. Please stay on the line.', ivrJoined: 'has joined the call',
     title: n, sub: 'AI assistant', subAgent: 'Chatting with an officer', launcher: `Ask ${n}`,
     placeholder: 'Type your question…', send: 'Send', open: 'Open the AI assistant', close: 'Close assistant', language: 'Language',
     voice: 'Start a voice call', callLauncher: 'Call',
@@ -18,6 +24,12 @@ export const STRINGS = {
     disclaimer: 'AI can make mistakes. Answers come from the official guides. Don’t share Aadhaar numbers, PINs or OTPs here.',
   },
   hi: {
+    keypad: 'कीपैड', keyDelete: 'मिटाएँ', keyConfirm: 'पुष्टि करें', keyHelp: '* मिटाता है · # पुष्टि करता है',
+    ivrMenu: 'अपना स्टेटस जानने के लिए 1 दबाएँ। अधिकारी से बात करने के लिए 0 दबाएँ।', ivrInvalid: 'माफ़ कीजिए, यह विकल्प नहीं है।',
+    ivrRef: (label) => `${label}: 10 अंक लिखें, फिर # दबाएँ।`, ivrRefBad: 'कृपया पूरे 10 अंक डालें।',
+    ivrOtp: 'आपके दर्ज मोबाइल पर OTP भेजा गया है। 6 अंक लिखें।', ivrOtpBad: 'यह OTP सही नहीं है। फिर से कोशिश करें।',
+    ivrDone: 'पुष्टि हो गई। यह रहा आपका स्टेटस। मेनू के लिए 9, अधिकारी के लिए 0 दबाएँ।',
+    ivrAgent: 'आपको अधिकारी से जोड़ रहे हैं। कृपया लाइन पर बने रहें।', ivrJoined: 'कॉल में जुड़ गए हैं',
     title: n, sub: 'AI सहायक', subAgent: 'अधिकारी से बातचीत', launcher: 'सवाल पूछें',
     placeholder: 'अपना सवाल लिखें…', send: 'भेजें', open: 'AI सहायक खोलें', close: 'सहायक बंद करें', language: 'भाषा',
     voice: 'वॉइस कॉल शुरू करें', callLauncher: 'कॉल करें',
@@ -31,6 +43,12 @@ export const STRINGS = {
     disclaimer: 'AI से गलती हो सकती है। जवाब आधिकारिक गाइड से आते हैं। यहाँ आधार नंबर, PIN या OTP न लिखें।',
   },
   te: {
+    keypad: 'కీప్యాడ్', keyDelete: 'తొలగించు', keyConfirm: 'నిర్ధారించు', keyHelp: '* తొలగిస్తుంది · # నిర్ధారిస్తుంది',
+    ivrMenu: 'మీ స్థితి తెలుసుకోవడానికి 1 నొక్కండి. అధికారితో మాట్లాడటానికి 0 నొక్కండి.', ivrInvalid: 'క్షమించండి, ఈ ఎంపిక లేదు.',
+    ivrRef: (label) => `${label}: 10 అంకెలు నమోదు చేసి, # నొక్కండి.`, ivrRefBad: 'దయచేసి మొత్తం 10 అంకెలు నమోదు చేయండి.',
+    ivrOtp: 'మీ నమోదిత మొబైల్‌కు OTP పంపాము. 6 అంకెలు నమోదు చేయండి.', ivrOtpBad: 'ఈ OTP సరైనది కాదు. మళ్లీ ప్రయత్నించండి.',
+    ivrDone: 'ధృవీకరించబడింది. ఇదిగో మీ స్థితి. మెనూకు 9, అధికారికి 0 నొక్కండి.',
+    ivrAgent: 'మిమ్మల్ని అధికారితో కలుపుతున్నాము. దయచేసి లైన్‌లో ఉండండి.', ivrJoined: 'కాల్‌లో చేరారు',
     title: n, sub: 'AI సహాయకుడు', subAgent: 'అధికారితో చాట్', launcher: 'ప్రశ్న అడగండి',
     placeholder: 'మీ ప్రశ్న టైప్ చేయండి…', send: 'పంపండి', open: 'AI సహాయకుడిని తెరవండి', close: 'సహాయకుడిని మూసివేయండి', language: 'భాష',
     voice: 'వాయిస్ కాల్ ప్రారంభించండి', callLauncher: 'కాల్ చేయండి',
@@ -44,6 +62,12 @@ export const STRINGS = {
     disclaimer: 'AI పొరపాట్లు చేయవచ్చు. సమాధానాలు అధికారిక మార్గదర్శకాల నుండి వస్తాయి. ఇక్కడ ఆధార్ నంబర్, PIN లేదా OTP పంచుకోవద్దు.',
   },
   ml: {
+    keypad: 'കീപാഡ്', keyDelete: 'മായ്ക്കുക', keyConfirm: 'സ്ഥിരീകരിക്കുക', keyHelp: '* മായ്ക്കും · # സ്ഥിരീകരിക്കും',
+    ivrMenu: 'നിങ്ങളുടെ സ്റ്റാറ്റസ് അറിയാൻ 1 അമർത്തുക. ഉദ്യോഗസ്ഥനുമായി സംസാരിക്കാൻ 0 അമർത്തുക.', ivrInvalid: 'ക്ഷമിക്കണം, ഈ ഓപ്ഷൻ ഇല്ല.',
+    ivrRef: (label) => `${label}: 10 അക്കങ്ങൾ നൽകി # അമർത്തുക.`, ivrRefBad: 'ദയവായി 10 അക്കങ്ങളും നൽകുക.',
+    ivrOtp: 'നിങ്ങളുടെ രജിസ്റ്റർ ചെയ്ത മൊബൈലിലേക്ക് OTP അയച്ചു. 6 അക്കങ്ങൾ നൽകുക.', ivrOtpBad: 'ഈ OTP ശരിയല്ല. വീണ്ടും ശ്രമിക്കുക.',
+    ivrDone: 'സ്ഥിരീകരിച്ചു. ഇതാ നിങ്ങളുടെ സ്റ്റാറ്റസ്. മെനുവിന് 9, ഉദ്യോഗസ്ഥന് 0 അമർത്തുക.',
+    ivrAgent: 'നിങ്ങളെ ഒരു ഉദ്യോഗസ്ഥനുമായി ബന്ധിപ്പിക്കുന്നു. ദയവായി ലൈനിൽ തുടരുക.', ivrJoined: 'കോളിൽ ചേർന്നു',
     title: n, sub: 'AI സഹായി', subAgent: 'ഉദ്യോഗസ്ഥനുമായി ചാറ്റ്', launcher: 'ചോദ്യം ചോദിക്കൂ',
     placeholder: 'നിങ്ങളുടെ ചോദ്യം ടൈപ്പ് ചെയ്യുക…', send: 'അയയ്ക്കുക', open: 'AI സഹായി തുറക്കുക', close: 'സഹായി അടയ്ക്കുക', language: 'ഭാഷ',
     voice: 'വോയ്സ് കോൾ ആരംഭിക്കുക', callLauncher: 'വിളിക്കുക',

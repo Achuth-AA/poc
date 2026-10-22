@@ -245,7 +245,27 @@ table.data tr:last-child td { border-bottom: 0; }
   .sheet { margin: 0; border-radius: 0; border-width: 1px 0 0; }
   .workspace { grid-template-columns: 1fr; }
   .convo { border: 0; border-top: 1px solid var(--border); }
-  .queue { max-height: 460px; }
+  .queue { max-height: none; overflow: visible; }
+  .queue__list { max-height: none; overflow: visible; }
+  .booked { flex: none; overflow: visible; }
+  .convo { min-height: 0; }
+  .card table.data { min-width: 640px; }
+  .card table.data td:nth-child(-n+4) { white-space: nowrap; }
+  /* Callbacks: each row becomes a card (ref and status, time, channel and language, summary, OTP and action). */
+  .card table.data--cards { min-width: 0; display: block; }
+  .data--cards thead { display: none; }
+  .data--cards tbody { display: grid; gap: 10px; }
+  .data--cards tr { display: grid; grid-template-columns: 1fr auto; grid-template-areas: "ref status" "when when" "ch lang" "sum sum" "ver act"; gap: 6px 12px; align-items: center; padding: 14px; border: 1px solid var(--border); border-radius: var(--radius-card); }
+  table.data--cards td { display: block; padding: 0; border: 0; white-space: normal !important; }
+  .data--cards td:nth-child(1) { grid-area: ref; font-weight: 600; }
+  .data--cards td:nth-child(2) { grid-area: when; font-weight: 500; }
+  .data--cards td:nth-child(3) { grid-area: ch; color: var(--muted); }
+  .data--cards td:nth-child(4) { grid-area: lang; color: var(--muted); justify-self: end; }
+  .data--cards td:nth-child(5) { grid-area: sum; }
+  .data--cards td:nth-child(6) { grid-area: ver; }
+  .data--cards td:nth-child(7) { grid-area: status; justify-self: end; }
+  .data--cards td:nth-child(8) { grid-area: act; justify-self: end; }
+  .data--cards td:nth-child(8):empty { display: none; }
   .line { max-width: 92%; }
   .assist { grid-template-columns: 1fr; }
   .page { padding: 20px 16px; }

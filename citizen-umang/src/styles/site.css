@@ -197,6 +197,7 @@ body.high-contrast { --muted: #111c33; --surface: #fff; --bg: #fff; }
   .faq__list { margin-left: 0; }
 }
 @media (max-width: 640px) {
+  .bar__tools button { min-height: 40px; min-width: 36px; padding: 8px 6px; }
   :root { --bar-h: 56px; }
   .bar__inner { gap: 10px 16px; padding-block: 8px; }
   .bar__nav { order: 3; flex-basis: 100%; gap: 18px; }

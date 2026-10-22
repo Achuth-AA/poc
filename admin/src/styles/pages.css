@@ -81,6 +81,14 @@
 .lib__map { --sel-h: 28px; --sel-size: 12px; max-width: 100%; justify-self: start; margin-top: 4px; }
 .lib__name .source__title { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .lib__grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+@media (max-width: 1000px) { .lib__grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 640px) {
+  .lib__grid { grid-template-columns: 1fr; }
+  /* A library row on a phone: icon, name and remove on top; its pickers underneath. */
+  .lib__item { grid-template-columns: 24px minmax(0, 1fr) auto; row-gap: 8px; padding: 10px 6px 10px 12px; }
+  .lib__item > .icon-btn { grid-column: 3; grid-row: 1; }
+  .lib__item > .sel { grid-column: 2 / -1; justify-self: start; --sel-h: 36px; }
+}
 .lib__card { border: 1px solid var(--line); border-radius: 8px; padding: 14px 14px 16px; display: grid; gap: 10px; align-content: start; background: var(--surface); transition: border-color 150ms ease, box-shadow 150ms ease; }
 @media (hover: hover) and (pointer: fine) { .lib__card:hover { border-color: var(--line-2); box-shadow: 0 1px 3px rgba(60, 64, 67, .15); } }
 .lib__card-head { display: flex; align-items: center; gap: 10px; }

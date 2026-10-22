@@ -35,7 +35,7 @@ export function LineChart({ labels, series, height = 240, threshold, unit = 'ms'
             <text x={pad.l - 8} y={y(v) + 4} className="axis" textAnchor="end">{Math.round(v)}</text>
           </g>
         ))}
-        {labels.map((l, i) => (i % 3 === 0 ? <text key={l} x={x(i)} y={h - 8} className="axis" textAnchor="middle">{l}</text> : null))}
+        {labels.map((l, i) => (i % (w < 520 ? 6 : 3) === 0 ? <text key={l} x={x(i)} y={h - 8} className="axis" textAnchor="middle">{l}</text> : null))}
         {threshold && (
           <>
             <line x1={pad.l} x2={w - pad.r} y1={y(threshold.value)} y2={y(threshold.value)} className="threshold" />
