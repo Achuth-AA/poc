@@ -85,7 +85,7 @@ a { color: inherit; text-decoration-thickness: 0.07em; text-underline-offset: 0.
 @media (hover: hover) and (pointer: fine) { .bar__tools button:hover { background: var(--surface); } .bar__tools button[aria-pressed="true"]:hover { background: var(--ink); } }
 
 /* ---------- hero: the card over a dim room ---------- */
-.hero { position: relative; height: 150svh; min-height: 980px; background: #1d1c1b; }
+.hero { position: relative; height: 150svh; min-height: 980px; background: #1d1c1b; overflow-x: clip; } /* clip keeps the intro zoom from widening the page; unlike hidden it does not break the sticky children */
 .hero__room { position: sticky; top: 0; display: block; width: 100%; height: 100svh; min-height: 640px; object-fit: cover; object-position: 50% 40%; filter: brightness(0.62); }
 .hero__stage { position: absolute; inset: 0; pointer-events: none; }
 .hero__card {
