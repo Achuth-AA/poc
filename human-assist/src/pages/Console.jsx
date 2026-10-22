@@ -102,11 +102,11 @@ function Today() {
     <>
       <section className="panel">
         <h3>Today</h3>
-        <dl className="kv">
-          <dt>Waiting now</dt><dd>{state.queue.length}</dd>
-          <dt>Completed</dt><dd>{state.done}</dd>
-          <dt>Callbacks due</dt><dd>{due}</dd>
-          <dt>Answers rated</dt><dd>{rated}</dd>
+        <dl className="stats">
+          <div className={state.queue.length ? 'is-alert' : ''}><dt>Waiting now</dt><dd>{state.queue.length}</dd></div>
+          <div><dt>Completed</dt><dd>{state.done}</dd></div>
+          <div className={due ? 'is-warn' : ''}><dt>Callbacks due</dt><dd>{due}</dd></div>
+          <div><dt>Answers rated</dt><dd>{rated}</dd></div>
         </dl>
       </section>
       <section className="panel">
@@ -164,7 +164,7 @@ function Conversation() {
     <>
       <div className="convo__head">
         <div className="convo__who">
-          <span className="convo__ch" aria-hidden="true"><Icon name={voice ? 'phone' : 'chat'} size={20} /></span>
+          <span className={`convo__ch ${a.ended ? '' : 'is-live'}`} aria-hidden="true"><Icon name={voice ? 'phone' : 'chat'} size={20} /></span>
           <div>
             <h2>{a.caller.label} <span className="tag">{a.lang}</span>
               {a.caller.verified ? <span className="tag tag--ok"><Icon name="check" size={14} />OTP verified</span> : <span className="tag tag--warn">Not verified</span>}</h2>
@@ -303,7 +303,7 @@ function AssistPanel() {
         <h3><Icon name="sparkle" size={16} />AI summary <span className="note">generated at handoff</span></h3>
         <p className="assist__intent">{a.summary.intent}</p>
         <ul className="assist__points">{a.summary.points.map((p) => <li key={p}>{p}</li>)}</ul>
-        <p className="note">Sentiment: <strong>{a.summary.sentiment}</strong> · Handoff reason: {a.reason}</p>
+        <p className="note">Sentiment: <strong className={`mood mood--${/distress|frustrat|angry|upset/i.test(a.summary.sentiment) ? 'bad' : /impatient/i.test(a.summary.sentiment) ? 'warn' : 'ok'}`}>{a.summary.sentiment}</strong> · Handoff reason: {a.reason}</p>
       </section>
 
       <section className="panel">
