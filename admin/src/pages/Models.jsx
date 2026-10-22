@@ -85,6 +85,8 @@ export default function Models() {
       <div className="studio">
         <div className="grid" style={{ alignContent: 'start' }}>
           <Playground draft={draft} opt={opt} />
+          <ChangeControl />
+          <FailoverDrills />
           <section className="card">
             <div className="card__head"><div><h2>Change history</h2><p>Every saved change is recorded (model governance, Annexure 14)</p></div></div>
             <div className="card__body card__body--flush table-wrap">
@@ -248,6 +250,99 @@ function Playground({ draft, opt }) {
           onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); run(text); } }} />
         <button type="submit" className="btn btn--primary" disabled={busy || !text.trim()}><Icon name="send" size={16} />Run</button>
       </form>
+    </section>
+  );
+}
+
+// Annexure 14: every component is version-pinned; a change needs notice, an evaluation against the accepted
+// baseline and an approval before it is promoted, and can be rolled back within 30 minutes.
+const PINS = [
+  ['LLM', 'claude-haiku-5-5', '2026-10-02', 'arjun.nair@dic.gov.in'],
+  ['STT', 'saarika:v2', '2026-10-21', 'arjun.nair@dic.gov.in'],
+  ['TTS', 'bulbul:v2', '2026-10-02', 'arjun.nair@dic.gov.in'],
+  ['Embeddings', 'bge-m3 @ 2026-09', '2026-09-28', 'meera.iyer@dic.gov.in'],
+  ['Reranker', 'bge-reranker-v2-m3', '2026-09-28', 'meera.iyer@dic.gov.in'],
+  ['Safety filter', 'guard-rules v12', '2026-10-15', 'meera.iyer@dic.gov.in'],
+  ['Prompt', 'answer_voice v3 · answer_chat v3', '2026-10-18', 'vikram.shah@negd.gov.in'],
+];
+const STEPS = ['Proposed', 'Evaluated', 'Approved', 'Promoted'];
+const EVAL = [['Answer accuracy', '96.2%', '97.4%', true], ['Wrong / made-up answers', '1.3%', '0.9%', true], ['Correct escalation', '96.7%', '97.0%', true], ['p95 latency (complex turns)', '1,140 ms', '1,060 ms', true], ['Red-team attacks blocked', '100%', '100%', true]];
+
+function ChangeControl() {
+  const { logChange, user } = useStore();
+  const toast = useToast();
+  const [step, setStep] = useState(1); // index into STEPS
+  const [promotedAt, setPromotedAt] = useState(null);
+  const [now, setNow] = useState(Date.now());
+  useEffect(() => { if (!promotedAt) return undefined; const iv = setInterval(() => setNow(Date.now()), 1000); return () => clearInterval(iv); }, [promotedAt]);
+  const left = promotedAt ? Math.max(0, 30 * 60 - Math.floor((now - promotedAt) / 1000)) : 0;
+
+  function approve() { setStep(2); logChange({ at: stamp(), who: user.email, kind: 'Approval', from: 'Proposed', to: 'Approved', note: 'Complex-turn model change approved after eval run #15' }); toast('Approved. It is not live until you promote it.'); }
+  function promote() { const t = Date.now(); setStep(3); setPromotedAt(t); setNow(t); logChange({ at: stamp(), who: user.email, kind: 'LLM (complex turns)', from: 'claude-haiku-5-5', to: 'claude-sonnet-5-5', note: 'Promoted to production; rollback available for 30 min' }); toast('Promoted. New complex turns use Claude Sonnet 5.5. You can roll back for the next 30 minutes.'); }
+  function rollback() { setStep(2); setPromotedAt(null); logChange({ at: stamp(), who: user.email, kind: 'Rollback', from: 'claude-sonnet-5-5', to: 'claude-haiku-5-5', note: 'Rolled back within the 30-minute window' }); toast('Rolled back. New calls are on the previous pinned version again.'); }
+
+  return (
+    <section className="card">
+      <div className="card__head"><div><h2>Change control</h2><p>Version-pinned components; changes need notice, evaluation and approval (Annexure 14)</p></div></div>
+      <div className="card__body" style={{ display: 'grid', gap: 16 }}>
+        <div className="proposal">
+          <div className="proposal__head">
+            <div><b>Use Claude Sonnet 5.5 for complex, tool-heavy turns</b><small>Proposed by arjun.nair@dic.gov.in · notice given 1 Oct (15 business days) · simple turns stay on Haiku</small></div>
+          </div>
+          <ol className="steps">{STEPS.map((x, i) => <li key={x} className={i <= step ? 'is-done' : ''}>{x}</li>)}</ol>
+          <div className="table-wrap">
+            <table className="data">
+              <thead><tr><th>Eval run #15 vs accepted baseline</th><th className="num">Now</th><th className="num">Proposed</th><th /></tr></thead>
+              <tbody>{EVAL.map(([m, a, b, ok]) => <tr key={m}><td>{m}</td><td className="num">{a}</td><td className="num">{b}</td><td>{ok ? <Badge tone="ok">No regression</Badge> : <Badge tone="bad">Worse</Badge>}</td></tr>)}</tbody>
+            </table>
+          </div>
+          <div className="toolbar">
+            {step === 1 && <button type="button" className="btn btn--primary" onClick={approve}><Icon name="check" size={16} />Approve</button>}
+            {step === 2 && <button type="button" className="btn btn--primary" onClick={promote}><Icon name="arrowUpRight" size={16} />Promote to production</button>}
+            {step === 3 && <button type="button" className="btn" onClick={rollback} disabled={!left}><Icon name="history" size={16} />Roll back ({Math.floor(left / 60)}:{String(left % 60).padStart(2, '0')} left)</button>}
+            <span className="note">Only roles with "Approve model or prompt changes" can approve.</span>
+          </div>
+        </div>
+        <div className="table-wrap">
+          <table className="data">
+            <thead><tr><th>Component</th><th>Pinned version</th><th>Since</th><th>Approved by</th></tr></thead>
+            <tbody>{PINS.map(([c, v, d, w]) => <tr key={c}><td>{c}</td><td className="mono">{c === 'LLM' && step === 3 ? 'claude-haiku-5-5 + claude-sonnet-5-5 (complex)' : v}</td><td style={{ whiteSpace: 'nowrap' }}>{d}</td><td className="cell-sub">{w}</td></tr>)}</tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+  );
+}
+
+// RFP §6.11: backup providers switch within 15 minutes and are drilled at least twice a year.
+function FailoverDrills() {
+  const { logChange, user } = useStore();
+  const toast = useToast();
+  const [rows, setRows] = useState([
+    ['2026-10-19 10:02', 'LLM', 'claude-haiku-5-5 → vllm-local', '6m 10s', 'Real outage · automatic'],
+    ['2026-09-12 15:30', 'STT', 'sarvam-saarika → deepgram-nova-3', '3m 42s', 'Planned drill'],
+    ['2026-04-08 11:00', 'TTS', 'sarvam-bulbul → google-tts', '4m 05s', 'Planned drill'],
+  ]);
+  const [running, setRunning] = useState(false);
+  function drill() {
+    setRunning(true);
+    setTimeout(() => {
+      setRunning(false);
+      setRows((r) => [[stamp(), 'TTS', 'sarvam-bulbul → google-tts', '2m 58s', 'Planned drill'], ...r]);
+      logChange({ at: stamp(), who: user.email, kind: 'Failover drill', from: 'sarvam-bulbul', to: 'google-tts', note: 'Switched in 2m 58s and back; target ≤ 15 min' });
+      toast('Drill passed: TTS switched to the backup in 2 min 58 s and back. Logged as evidence.');
+    }, 1200);
+  }
+  return (
+    <section className="card">
+      <div className="card__head"><div><h2>Failover drills</h2><p>Backup must take over within 15 minutes; drilled at least twice a year (RFP §6.11)</p></div>
+        <button type="button" className="btn btn--sm" onClick={drill} disabled={running}><Icon name="refresh" size={16} />{running ? 'Running drill…' : 'Run drill now'}</button></div>
+      <div className="card__body card__body--flush table-wrap">
+        <table className="data">
+          <thead><tr><th>When</th><th>Stage</th><th>Switched</th><th className="num">Time to switch</th><th>Result</th></tr></thead>
+          <tbody>{rows.map(([w, k, sw, t, why]) => <tr key={w + k}><td style={{ whiteSpace: 'nowrap' }}>{w}</td><td><Badge tone="muted">{k}</Badge></td><td className="mono" style={{ fontSize: 12 }}>{sw}</td><td className="num">{t}</td><td><Badge tone="ok">Within 15 min</Badge> <span className="cell-sub">{why}</span></td></tr>)}</tbody>
+        </table>
+      </div>
     </section>
   );
 }

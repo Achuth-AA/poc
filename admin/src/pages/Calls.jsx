@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import Badge from '../components/Badge.jsx';
 import { Stack } from '../components/charts.jsx';
@@ -90,6 +90,8 @@ export default function Calls() {
               <dt>Median turn latency</dt><dd>{median} ms</dd>
               <dt>Billing</dt><dd>{s.channel === 'voice' ? `${s.duration} voice minutes` : '1 completed chatbot session'}</dd>
             </dl>
+            {s.channel === 'voice' && <Recording key={s.id} s={s} />}
+            <AfterCall s={s} />
             <div className="stack-legend">{STAGES.map(([k, label, color]) => <span key={k}><i style={{ background: color }} />{label}</span>)}</div>
             <div className="turns">{turns.map((t, i) => <Turn key={i} t={t} channel={s.channel} />)}</div>
           </div>
@@ -124,6 +126,63 @@ function Turn({ t, channel }) {
         {t.tool && <div className="turn__tool"><Icon name="tool" size={14} /><span className="mono">{t.tool.name}({t.tool.args})</span> → {t.tool.status} · {t.tool.ms} ms</div>}
         {t.note && <div className="turn__note">{t.note}</div>}
       </div>
+    </div>
+  );
+}
+
+// Call recording with media processing applied before storage: keypad (OTP) tones removed, AI and caller
+// on separate channels, loudness normalised. Plays on a timer in the demo.
+function Recording({ s }) {
+  const total = (() => { const m = /(\d+)m\s*(\d+)s/.exec(s.duration); return m ? Number(m[1]) * 60 + Number(m[2]) : 60; })();
+  const [t, setT] = useState(0);
+  const [playing, setPlaying] = useState(false);
+  const [speed, setSpeed] = useState(1);
+  useEffect(() => {
+    if (!playing) return undefined;
+    const iv = setInterval(() => setT((x) => { if (x + speed >= total) { setPlaying(false); return total; } return x + speed; }), 1000);
+    return () => clearInterval(iv);
+  }, [playing, speed, total]);
+  const bars = useMemo(() => Array.from({ length: 72 }, (_, i) => 0.25 + 0.75 * Math.abs(Math.sin(i * 1.7 + s.id.length) * Math.cos(i * 0.37))), [s.id]);
+  const mmss = (v) => `${Math.floor(v / 60)}:${String(Math.floor(v % 60)).padStart(2, '0')}`;
+  const seek = (e) => { const r = e.currentTarget.getBoundingClientRect(); setT(Math.round(((e.clientX - r.left) / r.width) * total)); };
+  return (
+    <div className="player">
+      <button type="button" className="player__play" aria-label={playing ? 'Pause recording' : 'Play recording'} onClick={() => { if (t >= total) setT(0); setPlaying((p) => !p); }}>
+        <Icon name={playing ? 'pause' : 'play'} size={18} />
+      </button>
+      <div className="player__wave" role="slider" tabIndex={0} aria-label="Recording position" aria-valuemin={0} aria-valuemax={total} aria-valuenow={t} aria-valuetext={mmss(t)}
+        onClick={seek} onKeyDown={(e) => { if (e.key === 'ArrowRight') setT((x) => Math.min(total, x + 5)); if (e.key === 'ArrowLeft') setT((x) => Math.max(0, x - 5)); }}>
+        {bars.map((h, i) => <i key={i} className={i / bars.length < t / total ? 'is-played' : ''} style={{ height: `${Math.round(h * 100)}%` }} />)}
+      </div>
+      <span className="player__time">{mmss(t)} / {mmss(total)}</span>
+      <div className="seg" role="group" aria-label="Playback speed">
+        {[1, 1.5, 2].map((v) => <button key={v} type="button" aria-pressed={speed === v} onClick={() => setSpeed(v)}>{v}×</button>)}
+      </div>
+      <p className="player__note"><Icon name="shield" size={14} />Recording notice played at the start · keypad (OTP) tones removed · AI and caller on separate channels · kept 90 days in India</p>
+    </div>
+  );
+}
+
+const AFTER = {
+  handoff: [['transfer', 'Transferred to an officer with the AI summary', 'Agent console', 'Done'], ['clipboard', 'After-call notes saved to case C-5521', 'Citizen CRM · create_case', 'Done'], ['mail', 'SMS with the tracking link', 'SMS gateway · send_sms', 'Delivered']],
+  resolved: [['clipboard', 'Case closed with the AI summary', 'Citizen CRM · create_case', 'Done'], ['mail', 'Feedback request by SMS', 'SMS gateway · send_sms', 'Delivered']],
+  callback: [['calendar', 'Callback booked CB-48190 for 3–6 pm', 'Callback queue', 'Booked'], ['mail', 'SMS confirming the callback slot', 'SMS gateway · send_sms', 'Delivered']],
+  abandoned: [['mail', 'Missed-call SMS offering a callback', 'SMS gateway · send_sms', 'Delivered']],
+  live: [['clock', 'Runs when the session ends: notes, case and SMS', 'Workflow', 'Waiting']],
+};
+
+function AfterCall({ s }) {
+  const items = AFTER[s.outcome] || [];
+  if (!items.length) return null;
+  return (
+    <div className="after">
+      <h3>After-call actions</h3>
+      <ul>
+        {items.map(([icon, what, where, state]) => (
+          <li key={what}><span className="after__icon"><Icon name={icon} size={16} /></span><span><b>{what}</b><small>{where}</small></span>
+            <Badge tone={state === 'Waiting' ? 'muted' : 'ok'}>{state}</Badge></li>
+        ))}
+      </ul>
     </div>
   );
 }

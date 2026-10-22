@@ -6,7 +6,7 @@ import { useToast } from './Toast.jsx';
 import Icon from './Icon.jsx';
 import Select from './Select.jsx';
 
-const NAV = [{ to: '/', label: 'Live queue', icon: 'headset' }, { to: '/callbacks', label: 'Callbacks', icon: 'calendar' }];
+const NAV = [{ to: '/', label: 'Live queue', icon: 'headset' }, { to: '/callbacks', label: 'Callbacks', icon: 'calendar' }, { to: '/supervisor', label: 'Supervisor', icon: 'users' }];
 
 const STATUSES = [['available', 'Available'], ['busy', 'Busy'], ['away', 'Away']];
 
@@ -15,7 +15,7 @@ export default function Frame({ children }) {
   const toast = useToast();
   const { officer, status } = state;
   const location = useLocation();
-  const here = NAV.find((n) => (n.to === '/' ? !location.pathname.startsWith('/callbacks') : location.pathname.startsWith(n.to)));
+  const here = NAV.find((n) => (n.to === '/' ? !NAV.some((m) => m.to !== '/' && location.pathname.startsWith(m.to)) : location.pathname.startsWith(n.to)));
   const waiting = state.queue.length;
 
   function setStatus(value) {
