@@ -8,6 +8,7 @@ import { stamp } from '../lib/format.js';
 import { MIN_CONFIDENCE, retrieve } from '../lib/retrieve.js';
 import { useStore } from '../store.jsx';
 import Icon from '../components/Icon.jsx';
+import Select from '../components/Select.jsx';
 
 const LANGS = [['auto', 'Auto-detect'], ['en', 'English'], ['hi', 'हिन्दी · Hindi'], ['te', 'తెలుగు · Telugu'], ['ml', 'മലയാളം · Malayalam']];
 const SUGGESTIONS = ['Is a DigiLocker document valid as the original?', 'How do I check my EPF balance on UMANG?', 'UMANG లో EPF బ్యాలెన్స్ ఎలా చూడాలి?', 'DigiLocker PIN മറന്നു, എന്ത് ചെയ്യണം?'];
@@ -118,16 +119,12 @@ export default function Models() {
               <ProviderSelect label="Speech to text" kind="stt" value={draft.stt} providers={providers} onChange={(v) => choosePrimary('stt', v)} />
               <ProviderSelect label="Backup if it fails" kind="stt" value={draft.sttBackup} providers={providers} exclude={draft.stt} onChange={(v) => set('sttBackup', v)} compact />
               <ProviderSelect label="Text to speech" kind="tts" value={draft.tts} providers={providers} onChange={(v) => choosePrimary('tts', v)} />
-              <label className="run__field"><span>Voice</span>
-                <select value={draft.voice} onChange={(e) => set('voice', e.target.value)}>
-                  {(opt('tts', draft.tts).voices || []).map((v) => <option key={v}>{v}</option>)}
-                </select>
-              </label>
-              <label className="run__field"><span>Default language</span>
-                <select value={draft.defaultLang} onChange={(e) => set('defaultLang', e.target.value)}>
-                  {LANGS.map(([v, l]) => <option key={v} value={v}>{l}</option>)}
-                </select>
-              </label>
+              <div className="run__field"><span>Voice</span>
+                <Select block label="Voice" value={draft.voice} onChange={(v) => set('voice', v)} options={(opt('tts', draft.tts).voices || []).map((v) => ({ value: v, label: v }))} />
+              </div>
+              <div className="run__field"><span>Default language</span>
+                <Select block label="Default language" value={draft.defaultLang} onChange={(v) => set('defaultLang', v)} options={LANGS.map(([v, l]) => ({ value: v, label: l }))} />
+              </div>
             </div>
 
             <details className="run__adv">
@@ -157,15 +154,13 @@ function ProviderSelect({ label, kind, value, providers, onChange, exclude, comp
   const options = providers[kind].options.filter((o) => o.id !== exclude);
   const o = providers[kind].options.find((x) => x.id === value);
   return (
-    <label className="run__field">
+    <div className="run__field">
       <span>{label}</span>
-      <select value={value} onChange={(e) => onChange(e.target.value)}>
-        {options.map((x) => <option key={x.id} value={x.id}>{x.name} · {x.p50} ms</option>)}
-      </select>
+      <Select block label={label} value={value} onChange={onChange} options={options.map((x) => ({ value: x.id, label: `${x.name} · ${x.p50} ms` }))} />
       {!compact && o && (
         <p className="run__hint">{o.vendor} · {o.region} · <span className="mono">{o.version}</span> · <Badge status={o.health} /></p>
       )}
-    </label>
+    </div>
   );
 }
 

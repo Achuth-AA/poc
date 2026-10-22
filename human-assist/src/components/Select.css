@@ -1,0 +1,36 @@
+/* Custom dropdown (components/Select.jsx). Same file in every app; each app sets the --sel-* colours. */
+.sel { position: relative; display: inline-block; min-width: 0; vertical-align: middle; }
+.sel--block { display: block; width: 100%; }
+.sel__btn {
+  width: 100%; display: flex; align-items: center; gap: 8px; height: var(--sel-h, 38px); padding: 0 10px 0 12px;
+  font: inherit; font-size: var(--sel-size, inherit); color: var(--sel-ink, #111); background: var(--sel-bg, #fff); text-align: left; cursor: pointer;
+  border: 1px solid var(--sel-line, #d4d4d4); border-radius: var(--sel-radius, 6px);
+  transition: border-color 150ms ease, box-shadow 150ms ease, background-color 150ms ease;
+}
+.sel__btn[aria-expanded="true"] { border-color: var(--sel-accent, #111); box-shadow: 0 0 0 3px var(--sel-ring, rgba(0, 0, 0, .08)); }
+.sel__btn:disabled { opacity: .6; cursor: default; }
+.sel__value { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.sel__value--placeholder { color: var(--sel-muted, #666); }
+.sel__chev { flex: none; color: var(--sel-muted, #666); transition: transform 180ms cubic-bezier(0.23, 1, 0.32, 1); }
+.sel__btn[aria-expanded="true"] .sel__chev { transform: rotate(180deg); }
+@media (hover: hover) and (pointer: fine) { .sel__btn:hover:not(:disabled) { border-color: var(--sel-hover-line, var(--sel-muted, #666)); } }
+
+.sel__list {
+  position: absolute; left: 0; top: calc(100% + 6px); z-index: 60; min-width: 100%; width: max-content; max-width: min(380px, calc(100vw - 32px));
+  max-height: 288px; overflow-y: auto; margin: 0; padding: 4px; list-style: none;
+  background: var(--sel-pop, #fff); color: var(--sel-pop-ink, var(--sel-ink, #111)); border: 1px solid var(--sel-pop-line, rgba(0, 0, 0, .08));
+  border-radius: var(--sel-pop-radius, 10px); box-shadow: 0 2px 6px rgba(0, 0, 0, .08), 0 14px 36px rgba(0, 0, 0, .14);
+  font-size: var(--sel-size, inherit); transform-origin: top left; transition: opacity 140ms ease, transform 180ms cubic-bezier(0.23, 1, 0.32, 1);
+}
+.sel__list:focus { outline: none; }
+.sel--up .sel__list { top: auto; bottom: calc(100% + 6px); transform-origin: bottom left; }
+.sel--right .sel__list { left: auto; right: 0; }
+@starting-style { .sel__list { opacity: 0; transform: scale(.97) translateY(-4px); } }
+.sel__opt { display: flex; align-items: center; gap: 10px; min-height: 36px; padding: 7px 10px; border-radius: var(--sel-opt-radius, 6px); cursor: pointer; line-height: 1.3; }
+.sel__opt.is-active { background: var(--sel-hover, rgba(0, 0, 0, .05)); }
+.sel__opt[aria-selected="true"] { color: var(--sel-pop-accent, var(--sel-accent, #111)); font-weight: 600; }
+.sel__opt[aria-disabled="true"] { color: var(--sel-muted, #666); opacity: .6; cursor: default; }
+.sel__label { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.sel__check { flex: none; margin-left: auto; visibility: hidden; color: var(--sel-pop-accent, var(--sel-accent, #111)); }
+.sel__opt[aria-selected="true"] .sel__check { visibility: visible; }
+@media (prefers-reduced-motion: reduce) { .sel__list { transition: opacity 140ms ease; } @starting-style { .sel__list { transform: none; } } .sel__chev { transition: none; } }

@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { NavLink, Outlet, useLocation } from 'react-router-dom';
 import { useStore } from '../store.jsx';
 import Icon from './Icon.jsx';
+import Select from './Select.jsx';
 
 const NAV = [
   { to: '/', label: 'Overview', icon: 'grid' },
@@ -43,11 +44,8 @@ export default function Layout() {
           <span><strong>Voice AI Platform</strong><small>Admin console</small></span>
         </NavLink>
         <div className="switcher">
-          <label className="sr-only" htmlFor="helpline">Helpline</label>
-          <select id="helpline" defaultValue={kb.tenant}>
-            <option value={kb.tenant}>{kb.tenantName}</option>
-            <option disabled>Add a helpline (later)</option>
-          </select>
+          <Select id="helpline" label="Helpline" block value={kb.tenant} onChange={() => {}}
+            options={[{ value: kb.tenant, label: kb.tenantName }, { value: 'add', label: 'Add a helpline (later)', disabled: true }]} />
           <p className="switcher__meta"><span>Knowledge <b>v{kb.version}</b></span><span>India-hosted POC</span></p>
         </div>
         <nav aria-label="Admin">

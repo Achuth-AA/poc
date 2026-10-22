@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { useToast } from '../components/Toast.jsx';
 import { useAssist } from '../store.jsx';
 import Icon from '../components/Icon.jsx';
+import Select from '../components/Select.jsx';
 
 const mmss = (sec) => `${Math.floor(sec / 60)}:${String(sec % 60).padStart(2, '0')}`;
 const WHO = { ai: 'AI assistant', citizen: 'Citizen', officer: 'You' };
@@ -341,22 +342,19 @@ function AssistPanel() {
         </div>
         {form === 'ticket' && (
           <form className="mini" onSubmit={createTicket}>
-            <label className="field"><span>Category</span>
-              <select value={category} onChange={(e) => setCategory(e.target.value)}>
-                {state.categories.map((x) => <option key={x}>{x}</option>)}
-              </select>
-            </label>
+            <div className="field"><span>Category</span>
+              <Select block label="Category" value={category} onChange={setCategory} options={state.categories.map((x) => ({ value: x, label: x }))} />
+            </div>
             <label className="field"><span>Details</span><textarea rows={2} value={details} onChange={(e) => setDetails(e.target.value)} /></label>
             <button className="btn btn--primary btn--sm" type="submit">Create ticket</button>
           </form>
         )}
         {form === 'callback' && (
           <form className="mini" onSubmit={bookCallback}>
-            <label className="field"><span>When</span>
-              <select value={slot} onChange={(e) => setSlot(e.target.value)}>
-                <option>Tomorrow · 9 am – 12 pm</option><option>Tomorrow · 12 pm – 3 pm</option><option>Tomorrow · 3 pm – 6 pm</option>
-              </select>
-            </label>
+            <div className="field"><span>When</span>
+              <Select block label="When" value={slot} onChange={setSlot}
+                options={['Tomorrow · 9 am – 12 pm', 'Tomorrow · 12 pm – 3 pm', 'Tomorrow · 3 pm – 6 pm'].map((x) => ({ value: x, label: x }))} />
+            </div>
             <button className="btn btn--primary btn--sm" type="submit">Book</button>
           </form>
         )}
@@ -368,11 +366,10 @@ function AssistPanel() {
           <>
             <label className="field"><span>After-call notes (AI draft, edit as needed)</span>
               <textarea rows={5} value={a.notes} onChange={(e) => dispatch({ type: 'notes', notes: e.target.value })} /></label>
-            <label className="field"><span>Outcome</span>
-              <select ref={dispRef} value={disposition} onChange={(e) => setDisposition(e.target.value)}>
-                <option value="">Choose…</option>{state.dispositions.map((d) => <option key={d}>{d}</option>)}
-              </select>
-            </label>
+            <div className="field"><span>Outcome</span>
+              <Select block label="Outcome" buttonRef={dispRef} value={disposition} onChange={setDisposition} placeholder="Choose…"
+                options={state.dispositions.map((d) => ({ value: d, label: d }))} />
+            </div>
             <button type="button" className="btn btn--primary" onClick={complete}>Complete &amp; next</button>
           </>
         ) : <p className="note">End the call or chat to write notes and set the outcome. Notes are drafted by the AI from the transcript.</p>}

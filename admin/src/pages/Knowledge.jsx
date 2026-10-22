@@ -169,9 +169,10 @@ function RetrievalTest({ documents, chunks }) {
         <form onSubmit={(e) => { e.preventDefault(); setResult(retrieve(q, documents, chunks, { audience: as })); }} style={{ display: 'grid', gap: 8 }}>
           <textarea rows={2} value={q} onChange={(e) => setQ(e.target.value)} aria-label="Question" />
           <div className="toolbar">
-            <select value={as} onChange={(e) => setAs(e.target.value)} aria-label="Search as" style={{ flex: 1 }}>
-              <option value="public">As a citizen (public)</option><option value="internal">As an officer (+ internal)</option>
-            </select>
+            <div className="seg" role="group" aria-label="Search as" style={{ flex: 1 }}>
+              <button type="button" aria-pressed={as === 'public'} onClick={() => setAs('public')}>As a citizen</button>
+              <button type="button" aria-pressed={as === 'internal'} onClick={() => setAs('internal')}>As an officer (+ internal)</button>
+            </div>
             <button className="btn btn--primary" type="submit">Search</button>
           </div>
         </form>

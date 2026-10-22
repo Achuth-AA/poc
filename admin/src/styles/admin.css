@@ -37,6 +37,9 @@
   --float: 0 2px 6px rgba(0, 0, 0, .08), 0 12px 32px rgba(0, 0, 0, .12);
   --font: "Geist", "Noto Sans Devanagari", "Noto Sans Telugu", "Noto Sans Malayalam", Inter, system-ui, sans-serif;
   --mono: "Geist Mono", ui-monospace, Menlo, Consolas, monospace;
+  /* custom dropdown (components/Select.jsx) */
+  --sel-bg: var(--surface); --sel-ink: var(--ink); --sel-muted: var(--muted); --sel-line: var(--line-2); --sel-hover-line: #a3a3a3;
+  --sel-accent: var(--ink); --sel-ring: rgba(10, 10, 10, .07); --sel-hover: var(--surface-3); --sel-radius: var(--radius-sm); --sel-pop-radius: var(--radius); --sel-h: 40px;
 }
 
 * { box-sizing: border-box; }
@@ -68,7 +71,7 @@ code, .mono { font-family: var(--mono); font-size: 13px; }
 .side-brand strong { display: block; font-size: 14px; font-weight: 600; }
 .side-brand small { display: block; color: var(--muted); font-size: 12px; }
 .switcher { display: grid; gap: 6px; padding: 0 2px 16px; }
-.switcher select { font: inherit; font-weight: 500; color: var(--ink); height: 36px; padding: 0 28px 0 10px; border: 1px solid var(--line-2); border-radius: var(--radius-sm); background: var(--surface); }
+.switcher .sel { --sel-h: 36px; font-weight: 500; }
 .switcher__meta { display: flex; justify-content: space-between; padding: 0 8px; font-size: 12px; color: var(--muted); }
 .switcher__meta b { color: var(--ink); font-weight: 500; font-variant-numeric: tabular-nums; }
 .side-label { font-size: 12px; color: var(--muted); padding: 14px 12px 6px; }
@@ -187,11 +190,11 @@ table.data tbody tr.is-selected { background: var(--surface-3); }
 
 .field { display: grid; gap: 6px; }
 .field > span { font-size: 13px; font-weight: 500; color: var(--ink-2); }
-select, input[type="text"], input[type="search"], input[type="number"], input[type="url"], textarea {
+input[type="text"], input[type="search"], input[type="number"], input[type="url"], textarea {
   font: inherit; color: var(--ink); min-height: 40px; padding: 8px 12px; border: 1px solid var(--line-2); border-radius: var(--radius-sm); background: var(--surface); width: 100%;
   transition: border-color 150ms ease, box-shadow 150ms ease;
 }
-select:focus, input:focus, textarea:focus { outline: none; border-color: var(--ink); box-shadow: inset 0 0 0 1px var(--ink); }
+input:focus, textarea:focus { outline: none; border-color: var(--ink); box-shadow: inset 0 0 0 1px var(--ink); }
 textarea { resize: vertical; }
 input[type="range"] { accent-color: var(--ink); width: 100%; }
 .toolbar { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }

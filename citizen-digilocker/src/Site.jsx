@@ -4,6 +4,7 @@
 // that it is a demonstration. Buttons open the assistant through `assistant.open()`.
 import { useEffect, useRef, useState } from 'react';
 import Icon from './components/Icon.jsx';
+import Select from './components/Select.jsx';
 
 function Ask({ assistant, ask, call, language, className, children, label }) {
   const opts = call ? { call: true, language } : { ask, language };
@@ -46,6 +47,9 @@ const DOCS = [
     ask: 'How do I fetch my vehicle RC?',
   },
 ];
+
+const COUPON_DOCS = ['Driving licence', 'Class X marksheet', 'Vehicle RC', 'Aadhaar', 'PAN'];
+const COUPON_LANGS = [['en', 'English'], ['hi', 'हिन्दी'], ['te', 'తెలుగు'], ['ml', 'മലയാളം']];
 
 const FAQS = [
   ['Are these documents valid as originals?', 'Yes. A document issued into DigiLocker by the department counts as the original under Rule 9A of the IT (Digital Locker) Rules, 2016.'],
@@ -214,14 +218,25 @@ export default function Site({ assistant }) {
           </div>
         </section>
 
-        {/* Features: stacking sheets, each a capability with its own interface fragment */}
+        {/* Features: one band per capability, each with its own interface fragment */}
         <section className="sheets" aria-labelledby="sheets-title">
           <div className="frame"><h2 id="sheets-title" className="sheets__title" data-reveal>What the locker does</h2></div>
           <div className="sheet sheet--1">
             <div className="frame sheet__inner">
               <h3 data-reveal>No queue, no photocopies</h3>
               <p data-reveal>A document fetched here comes from the issuer itself, so a department, college or employer can accept it without a stamped copy or a visit to a counter.</p>
-              <figure className="sheet__pic" data-reveal><img src="/media/aadhaar-seva-kendra.jpg" alt="People queueing outside an Aadhaar Seva Kendra" width="1920" height="1440" loading="lazy" /></figure>
+              <div className="sheet__pic" data-ui data-reveal>
+                <div className="ui-verify">
+                  <p className="ui-verify__title"><span>Document check</span><span className="ui-verify__ok"><Icon name="checkCircle" size={14} />Verified</span></p>
+                  <p className="ui-verify__doc"><Icon name="file" size={16} /><span><b>Class X marksheet</b><small>Issued by CBSE · Roll 2104 7731</small></span></p>
+                  <ul>
+                    <li><Icon name="check" size={16} />Fetched from the issuer, not uploaded</li>
+                    <li><Icon name="check" size={16} />Digital signature is valid</li>
+                    <li><Icon name="check" size={16} />Counts as the original under IT Rule 9A</li>
+                  </ul>
+                  <p className="ui-verify__by">Accepted by Kendriya Vidyalaya admissions · no attested copy needed</p>
+                </div>
+              </div>
             </div>
           </div>
           <div className="sheet sheet--2">
@@ -284,18 +299,17 @@ export default function Site({ assistant }) {
               <div className="coupon__right">
                 <label className="sr-only" htmlFor="c-q">Your question</label>
                 <input id="c-q" ref={qRef} type="text" placeholder="Your question, for example: my licence will not fetch" value={coupon.q} onChange={(e) => setCoupon((c) => ({ ...c, q: e.target.value }))} />
-                <label className="sr-only" htmlFor="c-doc">Document</label>
-                <select id="c-doc" value={coupon.doc} onChange={(e) => setCoupon((c) => ({ ...c, doc: e.target.value }))}>
-                  {['Driving licence', 'Class X marksheet', 'Vehicle RC', 'Aadhaar', 'PAN'].map((d) => <option key={d}>{d}</option>)}
-                </select>
-                <label className="sr-only" htmlFor="c-lang">Language</label>
-                <select id="c-lang" value={coupon.lang} onChange={(e) => setCoupon((c) => ({ ...c, lang: e.target.value }))}>
-                  <option value="en">English</option><option value="hi" lang="hi">हिन्दी</option><option value="te" lang="te">తెలుగు</option><option value="ml" lang="ml">മലയാളം</option>
-                </select>
-                <label className="sr-only" htmlFor="c-how">Chat or call</label>
-                <select id="c-how" value={coupon.how} onChange={(e) => setCoupon((c) => ({ ...c, how: e.target.value }))}>
-                  <option value="chat">By chat</option><option value="call">On a voice call</option>
-                </select>
+                <Select id="c-doc" block className="coupon__sel" label="Document" value={coupon.doc} onChange={(v) => setCoupon((c) => ({ ...c, doc: v }))}
+                  options={COUPON_DOCS.map((d) => ({ value: d, label: d }))} />
+                <div className="coupon__seg" role="group" aria-label="Language">
+                  {COUPON_LANGS.map(([v, l]) => (
+                    <button key={v} type="button" lang={v} aria-pressed={coupon.lang === v} onClick={() => setCoupon((c) => ({ ...c, lang: v }))}>{l}</button>
+                  ))}
+                </div>
+                <div className="coupon__seg" role="group" aria-label="Chat or call">
+                  <button type="button" aria-pressed={coupon.how === 'chat'} onClick={() => setCoupon((c) => ({ ...c, how: 'chat' }))}><Icon name="chat" size={16} />By chat</button>
+                  <button type="button" aria-pressed={coupon.how === 'call'} onClick={() => setCoupon((c) => ({ ...c, how: 'call' }))}><Icon name="phone" size={16} />On a voice call</button>
+                </div>
                 <button type="submit" className="coupon__submit">{coupon.how === 'call' ? 'Start the call' : 'Ask the assistant'}</button>
               </div>
             </form>
@@ -307,7 +321,7 @@ export default function Site({ assistant }) {
       <footer className="tiles" aria-label="Footer">
         <div className="tile tile--statement" data-reveal>
           <p>A demonstration of DigiLocker with an AI assistant, built for the Voice AI Agent POC.</p>
-          <p className="tile__small">Content is summarised from public information and may be out of date. Photographs: “Mahbubnagar District Old Collectorate Building, Telangana” by Kavali Chandrakanth KCK, CC0; “AADHAAR SEVA KENDRA” by Suyash.dwivedi, CC BY-SA 4.0; both via Wikimedia Commons. Document details shown are samples.</p>
+          <p className="tile__small">Content is summarised from public information and may be out of date. Photograph: “Mahbubnagar District Old Collectorate Building, Telangana” by Kavali Chandrakanth KCK, CC0, via Wikimedia Commons. Document details shown are samples.</p>
         </div>
         <nav className="tile tile--nav" aria-label="Footer" data-reveal><a href="#documents">Documents</a><a href="#how">Sign up</a><a href="#faq">Help</a><a href="https://www.digilocker.gov.in" rel="noopener noreferrer" target="_blank">The real DigiLocker</a></nav>
         <div className="tile tile--langs" data-reveal><p>Help in</p><p className="tile__big">English, हिन्दी, తెలుగు, മലയാളം</p></div>
